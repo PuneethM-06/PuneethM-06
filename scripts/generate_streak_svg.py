@@ -3,7 +3,7 @@
 Works standalone; designed to run in a GitHub Action daily to stay live.
 Usage: python generate_streak_svg.py [username] [output.svg]
 """
-import sys, json, os, datetime, urllib.request
+import sys, json, os, datetime
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -14,22 +14,43 @@ with open(CONFIG_PATH) as fh:
 USER = sys.argv[1] if len(sys.argv) > 1 else CONFIG["github_username"]
 OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, CONFIG["assets"]["heatmap_output"])
 
+
+def level_for(count):
+    if count == 0:
+        return 0
+    if count <= 5:
+        return 1
+    if count <= 15:
+        return 2
+    if count <= 30:
+        return 3
+    if count <= 50:
+        return 4
+    return 5
+
+
 def get_data(user):
-    url = f"https://github-contributions-api.jogruber.de/v4/{user}?y=last"
-    try:
-        with urllib.request.urlopen(url, timeout=25) as r:
-            return json.loads(r.read().decode())
-    except Exception as e:
-        # fallback to a local snapshot if the API is unreachable
-        here = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contrib.json")
-        if os.path.exists(here):
-            print("API failed (%s); using local contrib.json" % e)
-            return json.load(open(here))
-        raise
+    here = os.path.join(ROOT, "data", "contributions.json")
+    if os.path.exists(here):
+        with open(here) as fh:
+            data = json.load(fh)
+        return data
+
+    fallback = os.path.join(HERE, "contrib.json")
+    if os.path.exists(fallback):
+        with open(fallback) as fh:
+            return json.load(fh)
+
+    raise FileNotFoundError(f"No contribution data found at {here}")
+
 
 data = get_data(USER)
-contribs = data["contributions"]
-total = data["total"]["lastYear"]
+if "days" in data and isinstance(data["days"], list):
+    contribs = [{"date": day["date"], "level": level_for(day["count"])} for day in data["days"]]
+    total = data["total_contributions"]
+else:
+    contribs = data["contributions"]
+    total = data["total"]["lastYear"]
 
 # ---- layout ----
 CELL, GAP, RAD, LEFT, TOP = 13, 3, 2.5, 34, 24
@@ -63,9 +84,10 @@ for i, c in enumerate(contribs):
     x = LEFT + wk*(CELL+GAP); y = TOP + row*(CELL+GAP)
     delay = round((wk + row*0.55)/maxorder * REVEAL, 3)
     cls = "c g" if lvl >= 1 else "c e"
+    color_index = min(lvl, len(COLORS) - 1)
     rects.append(
         f'<rect class="{cls}" x="{x}" y="{y}" width="{CELL}" height="{CELL}" rx="{RAD}" '
-        f'fill="{COLORS[lvl]}" style="animation-delay:{delay}s"/>'
+        f'fill="{COLORS[color_index]}" style="animation-delay:{delay}s"/>'
     )
 
 svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">
