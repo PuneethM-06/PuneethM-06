@@ -12,9 +12,14 @@ import datetime
 import json
 import os
 
-HERE = os.path.dirname(__file__)
-IN_PATH = os.path.join(HERE, "..", "data", "contributions.json")
-OUT_PATH = os.path.join(HERE, "..", "contrib-heatmap.svg")
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+CONFIG_PATH = os.path.join(ROOT, "config.json")
+with open(CONFIG_PATH) as fh:
+    CONFIG = json.load(fh)
+
+IN_PATH = os.path.join(ROOT, CONFIG["assets"]["contributions_data"])
+OUT_PATH = os.path.join(ROOT, CONFIG["assets"]["heatmap_output"])
 
 # GitHub-ish green ramp: empty -> brightest. Level 5 is a brighter neon top end.
 PALETTE = ["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353", "#69f0a0"]
@@ -109,9 +114,10 @@ def render(data):
 .c {{ opacity: 0; animation: cell {CELL_DUR:.2f}s cubic-bezier(.2,.8,.2,1) both; }}
 """.strip()
 
-    parts = [
+    font_family = CONFIG["theme"].get("font", "JetBrains Mono")
+parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{canvas_w}" height="{canvas_h}" '
-        f'viewBox="0 0 {canvas_w} {canvas_h}" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">',
+        f'viewBox="0 0 {canvas_w} {canvas_h}" font-family="{font_family}, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">',
         f'<style>{css}</style>',
         '<defs>'
         f'<linearGradient id="hbg" x1="0" y1="0" x2="0" y2="1">'
@@ -125,7 +131,7 @@ def render(data):
     for i, dotcol in enumerate(["#ff5f56", "#ffbd2e", "#27c93f"]):
         parts.append(f'<circle cx="{PAD + i*16}" cy="{TITLEBAR_H/2}" r="5" fill="{dotcol}"/>')
     parts.append(f'<text x="{canvas_w/2}" y="{TITLEBAR_H/2 + 4}" fill="{MUTED}" font-size="12" '
-                 f'text-anchor="middle">avi@github: ~/contributions --graph</text>')
+                 f'text-anchor="middle">{CONFIG["github_username"]}@github: ~/contributions --graph</text>')
 
     grid_top = TITLEBAR_H + TOP_LABEL_H
     grid_left = PAD + LEFT_LABEL_W

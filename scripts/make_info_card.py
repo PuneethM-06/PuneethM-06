@@ -8,10 +8,16 @@ it feels like the panel is printing alongside the portrait. STATIC=1 emits the
 frozen state for Quick Look previews.
 """
 import html
+import json
 import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "..", "info-card.svg")
+ROOT = os.path.dirname(HERE)
+CONFIG_PATH = os.path.join(ROOT, "config.json")
+with open(CONFIG_PATH) as fh:
+    CONFIG = json.load(fh)
+
+OUT = os.path.join(ROOT, CONFIG["assets"]["info_card_output"])
 STATIC = bool(os.environ.get("STATIC"))
 
 W, H = 480, 376
@@ -26,33 +32,32 @@ BG2 = "#111722"
 FRAME = "#30363d"
 MUTED = "#7d8590"
 INK = "#c9d1d9"
-KEY = "#ffa657"      # orange keys (matches Andrew)
-SECTION = "#58a6ff"  # blue section headers
+KEY = "#ffa657"
+SECTION = "#58a6ff"
 GREEN = "#3fb950"
-ACCENT = "#22d3ee"
+ACCENT = CONFIG["theme"]["accent"]
 
 # content model: tuples describing each row
-# ("host",)                    -> "avi@github" + rule
+# ("host",)                    -> "<username>@github" + rule
 # ("kv", key, value)           -> orange key + light value
 # ("sec", title)               -> blue "— title —" rule
 # ("bul", text)                -> green dot + light text
 # ("gap",)                     -> vertical space
 ROWS = [
     ("host",),
-    ("kv", "Now", "Software Engineer @ Dock.us"),
-    ("kv", "Prev", "Founding Engineer @ Turgon AI"),
-    ("kv", "Also", "SDE + Instructor @ AccioJob (YC'21)"),
-    ("kv", "Edu", "B.Tech CS, IIIT Delhi '24"),
+    ("kv", "Role", f"{CONFIG['role']} @ {CONFIG['company']}"),
+    ("kv", "Location", CONFIG['location']),
+    ("kv", "Focus", ", ".join(CONFIG['focus'])),
     ("gap",),
     ("sec", "Stack"),
-    ("kv", "Frontend", "React, Next.js, TypeScript, R3F"),
-    ("kv", "Backend", "Node, NestJS, GraphQL, Django"),
-    ("kv", "AI / ML", "LangChain, Vercel AI SDK, OpenAI"),
-    ("kv", "Cloud", "AWS, Docker, Vercel, Prisma"),
+    ("kv", "Languages", ", ".join(CONFIG['languages'])),
+    ("kv", "Technologies", ", ".join(CONFIG['technologies'])),
     ("gap",),
-    ("sec", "Highlights"),
-    ("bul", "Taught 100,000+ developers to code"),
-    ("bul", "2 books · 100k+ podcast streams"),
+    ("sec", "Projects"),
+    ("bul", "linux-sysmonitor"),
+    ("bul", "devOps-Lab"),
+    ("bul", "AWS Learning"),
+    ("bul", "Portfolio"),
 ]
 
 
@@ -71,9 +76,10 @@ def rise(inner, i):
             f'begin="{delay:.2f}s" dur="0.4s" fill="freeze" calcMode="spline" keySplines="0.2 0.8 0.2 1"/></g>')
 
 
+font_family = CONFIG["theme"].get("font", "JetBrains Mono")
 parts = [
     f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" '
-    f'font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">',
+    f'font-family="{font_family}, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">',
     '<defs>'
     f'<linearGradient id="ibg" x1="0" y1="0" x2="0" y2="1">'
     f'<stop offset="0" stop-color="{BG2}"/><stop offset="1" stop-color="{BG}"/></linearGradient></defs>',
@@ -84,7 +90,7 @@ parts = [
 for i, dotcol in enumerate(["#ff5f56", "#ffbd2e", "#27c93f"]):
     parts.append(f'<circle cx="{PAD + i*16}" cy="{TITLEBAR_H/2}" r="5" fill="{dotcol}"/>')
 parts.append(f'<text x="{W/2}" y="{TITLEBAR_H/2 + 4}" fill="{MUTED}" font-size="12" '
-             f'text-anchor="middle">avi@github: ~$ neofetch</text>')
+             f'text-anchor="middle">{CONFIG["github_username"]}@github: ~$ neofetch</text>')
 
 y = TITLEBAR_H + 30
 for i, row in enumerate(ROWS):
@@ -94,7 +100,7 @@ for i, row in enumerate(ROWS):
         continue
     if kind == "host":
         inner = (f'<text x="{KEY_X}" y="{y:.1f}" font-size="14" font-weight="700">'
-                 f'<tspan fill="{GREEN}">avi</tspan><tspan fill="{MUTED}">@</tspan>'
+                 f'<tspan fill="{GREEN}">{CONFIG["name"]}</tspan><tspan fill="{MUTED}">@</tspan>'
                  f'<tspan fill="{ACCENT}">github</tspan></text>'
                  f'<line x1="{KEY_X+96}" y1="{y-4:.1f}" x2="{W-PAD}" y2="{y-4:.1f}" '
                  f'stroke="{FRAME}" stroke-opacity="0.8"/>')

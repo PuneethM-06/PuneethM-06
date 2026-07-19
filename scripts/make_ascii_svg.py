@@ -12,16 +12,22 @@ does not run). Each row is revealed with a left-to-right clip wipe plus a small
 block cursor riding the wipe edge, staggered top -> bottom, so the whole
 portrait prints once and freezes.
 """
-from PIL import Image, ImageEnhance, ImageOps, ImageFilter
+from PIL import Image, ImageEnhance, ImageFilter
 import html
+import json
 import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+CONFIG_PATH = os.path.join(ROOT, "config.json")
+with open(CONFIG_PATH) as fh:
+    CONFIG = json.load(fh)
+
 # defaults to the prepped grayscale image (see prep_photo.py), which already has
 # the background removed + local contrast applied.
-SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "..", "source-prepped.png")
-OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(HERE, "..", "avi-ascii.svg")
+SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "profile_photo.png")
+OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, CONFIG["assets"]["ascii_output"])
 
 COLS = 100
 ROWS = 53
@@ -85,9 +91,10 @@ art_top = TITLEBAR_H + PAD * 0.35
 
 # ---- 2. assemble SVG ------------------------------------------------------
 parts = []
+font_family = CONFIG["theme"].get("font", "JetBrains Mono")
 parts.append(
     f'<svg xmlns="http://www.w3.org/2000/svg" width="{CANVAS_W}" height="{CANVAS_H}" '
-    f'viewBox="0 0 {CANVAS_W} {CANVAS_H}" font-family="ui-monospace, SFMono-Regular, '
+    f'viewBox="0 0 {CANVAS_W} {CANVAS_H}" font-family="{font_family}, ui-monospace, SFMono-Regular, '
     f'Menlo, Consolas, monospace">'
 )
 parts.append('<defs>'
@@ -103,7 +110,7 @@ parts.append(f'<line x1="0" y1="{TITLEBAR_H}" x2="{CANVAS_W}" y2="{TITLEBAR_H}" 
 for i, dotcol in enumerate(["#ff5f56", "#ffbd2e", "#27c93f"]):
     parts.append(f'<circle cx="{PAD + i*16}" cy="{TITLEBAR_H/2}" r="5" fill="{dotcol}"/>')
 parts.append(f'<text x="{CANVAS_W/2}" y="{TITLEBAR_H/2 + 4}" fill="{TITLE_TEXT}" font-size="12" '
-             f'text-anchor="middle">avi@github: ~$ ./portrait.sh</text>')
+             f'text-anchor="middle">{CONFIG["github_username"]}@github: ~$ ./portrait.sh</text>')
 
 # one <text> per row (single color -> no per-char markup, tiny file)
 font_size = CELL_H * 0.86
@@ -138,7 +145,7 @@ status_line_y = TITLEBAR_H + ART_H + PAD * 0.35
 status_y = status_line_y + 19
 parts.append(f'<line x1="0" y1="{status_line_y:.1f}" x2="{CANVAS_W}" y2="{status_line_y:.1f}" stroke="{FRAME}"/>')
 parts.append(f'<text x="{PAD}" y="{status_y:.1f}" fill="{TITLE_TEXT}" font-size="13">'
-             f'avi@github:~$ whoami <tspan fill="{INK}">Avi Vashishta</tspan></text>')
+             f'{CONFIG["github_username"]}@github:~$ whoami <tspan fill="{INK}">{CONFIG["name"]}</tspan></text>')
 parts.append(f'<rect x="{PAD+196}" y="{status_y-12:.1f}" width="8" height="14" fill="{INK}">'
              f'<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.5;0.51;1" '
              f'dur="1s" repeatCount="indefinite"/></rect>')

@@ -17,9 +17,16 @@ import sys
 import requests
 from bs4 import BeautifulSoup
 
-USERNAME = os.environ.get("GH_PROFILE_USER", "AVIVASHISHTA29")
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+CONFIG_PATH = os.path.join(ROOT, "config.json")
+
+with open(CONFIG_PATH) as fh:
+    CONFIG = json.load(fh)
+
+USERNAME = os.environ.get("GH_PROFILE_USER", CONFIG["github_username"])
 URL = f"https://github.com/users/{USERNAME}/contributions"
-OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "contributions.json")
+OUT_PATH = os.path.join(ROOT, CONFIG["assets"]["contributions_data"])
 
 
 def fetch_days():

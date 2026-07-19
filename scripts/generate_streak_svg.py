@@ -5,8 +5,14 @@ Usage: python generate_streak_svg.py [username] [output.svg]
 """
 import sys, json, os, datetime, urllib.request
 
-USER = sys.argv[1] if len(sys.argv) > 1 else "AVIVASHISHTA29"
-OUT  = sys.argv[2] if len(sys.argv) > 2 else "streak.svg"
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+CONFIG_PATH = os.path.join(ROOT, "config.json")
+with open(CONFIG_PATH) as fh:
+    CONFIG = json.load(fh)
+
+USER = sys.argv[1] if len(sys.argv) > 1 else CONFIG["github_username"]
+OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, CONFIG["assets"]["heatmap_output"])
 
 def get_data(user):
     url = f"https://github-contributions-api.jogruber.de/v4/{user}?y=last"
