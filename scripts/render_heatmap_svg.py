@@ -115,7 +115,7 @@ def render(data):
 """.strip()
 
     font_family = CONFIG["theme"].get("font", "JetBrains Mono")
-parts = [
+    parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{canvas_w}" height="{canvas_h}" '
         f'viewBox="0 0 {canvas_w} {canvas_h}" font-family="{font_family}, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">',
         f'<style>{css}</style>',
