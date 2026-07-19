@@ -29,6 +29,7 @@
 <p><b>Associate Software Engineer · Cargill</b></p>
 
 [![GitHub](https://img.shields.io/badge/GitHub-PuneethM--06-0d1117?style=for-the-badge&logo=github&logoColor=white)](https://github.com/PuneethM-06)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-puneethm06-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/puneethm06/)
 [![Role](https://img.shields.io/badge/Role-Associate_Software_Engineer-39d353?style=for-the-badge&logo=code&logoColor=black)](https://github.com/PuneethM-06)
 [![Focus](https://img.shields.io/badge/Focus-AWS%20%7C%20Terraform%20%7C%20Docker-22d3ee?style=for-the-badge&logo=amazonaws&logoColor=black)](https://github.com/PuneethM-06)
 [![Projects](https://img.shields.io/badge/Projects-linux--sysmonitor%20%7C%20devOps--Lab-0A66C2?style=for-the-badge&logo=git&logoColor=white)](https://github.com/PuneethM-06)
