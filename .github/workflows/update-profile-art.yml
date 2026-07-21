@@ -29,11 +29,19 @@ jobs:
       - name: Scrape real contribution data (no auth needed)
         run: python scripts/fetch_contributions.py
 
+      - name: Record a daily automation heartbeat
+        run: python scripts/record_heartbeat.py
+
       - name: Render animated contribution graph SVG
         run: python scripts/generate_streak_svg.py
+
+      - name: Configure git identity
+        run: |
+          git config user.name "PuneethM-06"
+          git config user.email "puneethm06@users.noreply.github.com"
 
       - name: Commit updated art
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: refresh contribution graph [skip ci]"
-          file_pattern: "data/contributions.json contrib-heatmap.svg"
+          commit_message: "chore: refresh profile heartbeat [skip ci]"
+          file_pattern: "data/contributions.json data/automation-heartbeat.json contrib-heatmap.svg"
